@@ -1,5 +1,5 @@
 #include "list.h"
-
+#include <stdio.h>
 #include <stdlib.h>
 
 void init(struct node** root, int id) {
@@ -27,20 +27,23 @@ struct node* find_element(struct node* root, int id) {
     return tmp;
 }
 
-struct node* delete_elem(struct node* root, struct node* lst, int id) {
-    struct node* tmp = root;
-    while (tmp->next != lst) {
+struct node* delete_elem(struct node* lst, int id) {
+    struct node* tmp = lst;
+    id = id;
+    while (tmp->next->id != id) {
         tmp = tmp->next;
     }
+    struct node* delete = tmp->next;
+    tmp->next = delete->next;
+    free(delete);
 
-    tmp->next = lst->next;
-    free(lst);
     return tmp;
 }
 
 void print_list(struct node* root) {
-    while (root->next != NULL) {
+    while (root != NULL) {
         printf("%d ", root->id);
+        root = root->next;
     }
     printf("\n");
 }
