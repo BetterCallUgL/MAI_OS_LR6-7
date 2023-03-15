@@ -27,6 +27,7 @@ struct node* find_element(struct node* root, int id) {
     return tmp;
 }
 
+
 struct node* delete_elem(struct node* lst, int id) {
     struct node* tmp = lst;
     id = id;

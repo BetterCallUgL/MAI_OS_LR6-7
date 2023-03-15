@@ -2,7 +2,10 @@
 
 #include <stdio.h>
 
-void printmenu() { printf("1.create new id\n"); }
+void printmenu() { 
+    printf("1.Create new root\n");
+    printf("2.Create new node\n");
+}
 
 void input1(int *parent_id, int *new_id) {
     printf("enter parent id: ");
