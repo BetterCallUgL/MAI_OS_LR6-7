@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include "list.h"
 
 int main() {
@@ -12,7 +13,6 @@ int main() {
     while (command != 5) {
         scanf("%d", &command);
         switch (command) {
-
             case 0: {
                 printf("0.menu\n1.create new list\n2.add\n3.delete\n4.print\n5.destroy\n6.leave\n");
                 break;
@@ -27,7 +27,7 @@ int main() {
                     flag = 1;
                 } else {
                     roots = realloc(roots, (++list_size) * sizeof(struct node*));
-                    init(roots+list_size-1,id);
+                    init(roots + list_size - 1, id);
                 }
                 break;
             }
@@ -85,15 +85,15 @@ int main() {
                 if (tmp == NULL) {
                     printf("NOT FOUND\n");
                 } else {
-                    printf("%dHAHAHHA\n",tmp->id);
+                    printf("%dHAHAHHA\n", tmp->id);
                     delete_elem(root, tmp->id);
                 }
 
                 break;
             }
 
-            case 4:{
-                for (int i = 0;i < list_size;++i){
+            case 4: {
+                for (int i = 0; i < list_size; ++i) {
                     print_list(roots[i]);
                 }
 

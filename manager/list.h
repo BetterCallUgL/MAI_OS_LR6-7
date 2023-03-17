@@ -8,7 +8,7 @@ struct node {
 };
 
 void init(struct node** root, int id);
-struct node* add_element(struct node* root,int id);
+struct node* add_element(struct node* root, int id);
 struct node* find_element(struct node* root, int id);
 struct node* delete_elem(struct node* root, int id);
 void print_list(struct node* root);
