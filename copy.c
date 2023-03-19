@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
         char child_adress[50];
         sprintf(child_adress,"tcp://localhost:%d", 5555 + child_id);
         zmq_connect(child_pusher,child_adress);
-        printf("%d: У меня есть ребёнок\n",my_id);
+        printf("%d: У меня есть ребёнок - %d\n",my_id,child_id);
         fflush(stdout);
     }
 
@@ -68,12 +68,12 @@ int main(int argc, char* argv[]) {
                 }
             } else if (child_id != 0 && my_id != (atoi)(creator_id)){
                 printf("%d:Пересылаю %d\n",my_id, child_id);
-                fflush(stdout);
                 zmq_send(child_pusher,copy_message,sizeof(copy_message),0);
             } else if (child_id != 0 && my_id == (atoi)(creator_id)){
+                printf("че за хуйня\n");
                 char new_parent[50];
                 sprintf(new_parent,"new %s",new_id);
-                zmq_send(child_pusher,copy_message,sizeof(copy_message),0);
+                zmq_send(child_pusher,new_parent,sizeof(copy_message),0);
                 int process_id = fork();
                 if (!process_id){
                     execl(argv[0],argv[0],new_id,creator_id,child_id,NULL);
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        if (strcmp(command,"new")){
+        if (!strcmp(command,"new")){
             char* new_parent = strtok(NULL," ");
             parent_id = atoi(new_parent);
             sprintf(parent_adress, "tcp://localhost:%d", 5555 + parent_id);
