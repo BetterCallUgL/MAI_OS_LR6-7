@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "list.h"
+#include "../list/list.h"
 
 void printmenu() {
     printf("1.Print menu\n");
@@ -22,10 +22,10 @@ struct node* node_exists(struct node** roots, int root_count, int element_id) {
     return list_node;
 }
 
-int find_root(struct node** roots,int root_count,int parent_id){
+int find_root(struct node** roots, int root_count, int parent_id) {
     int root_number = -1;
-    for (int i = 0; i < root_count;++i){
-        if (find_element(roots[i],parent_id) != NULL){
+    for (int i = 0; i < root_count; ++i) {
+        if (find_element(roots[i], parent_id) != NULL) {
             root_number = i;
             break;
         }

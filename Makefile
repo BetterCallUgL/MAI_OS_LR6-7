@@ -1,10 +1,14 @@
+CC = gcc
+CFLAGS = -Wall -Werror -Wextra -o
+OBJS = manager/*.c list/list.c
+
 all: compute node
 
 compute:
-	gcc -Wall -Werror -Wextra -o compute manager/*.c -lzmq
+	gcc $(CFLAGS) compute $(OBJS) -lzmq
 
 node:
-	gcc -o worker/worker worker/worker.c -lzmq
+	gcc $(CFLAGS) worker/worker worker/worker.c -lzmq
 
 run:
 	./compute
