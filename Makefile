@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Werror -Wextra -o
+CFLAGS = -Wall -Wextra -o
 OBJS = manager/*.c list/list.c
 
 all: compute node

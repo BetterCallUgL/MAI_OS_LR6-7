@@ -13,8 +13,7 @@ int main() {
     void* context = zmq_ctx_new();
     void** pushers = malloc(sizeof(void*));
     void* puller = zmq_socket(context, ZMQ_PULL);
-    zmq_bind(puller, "tcp://127.0.0.1:10000");
-    perror("root");
+    zmq_bind(puller, "tcp://*:5554");
     int root_count = 1, first_root = 1;
     char path[] = "/home/ugl/OS/worker/worker";
     printmenu();
@@ -45,12 +44,13 @@ int main() {
                     pushers = realloc(pushers,root_count*sizeof(void *));                
                 }
             }
-
+                
             pushers[root_count - 1] = zmq_socket(context, ZMQ_PUSH);
+            printf("%d",root_count - 1);
             char adress[50];
-            sprintf(adress, "tcp://127.0.0.1:%d", 10000 + root_id);
+            sprintf(adress, "tcp://localhost:%d", 5555 + root_id);
+            printf("address:%s",adress);
             zmq_connect(pushers[root_count - 1], adress);
-            printf("has connected to %s",adress);
             int process_id = fork();
             if (!process_id) {
                 char id[10];
@@ -83,27 +83,19 @@ int main() {
             char create_command[50];
             int root_number = find_root(roots, root_count, parent_id);
             sprintf(create_command, "create %d %d", new_id, parent_id);
-            zmq_send(pushers[root_number], create_command, strlen(create_command) + 1, 0);
-            perror("zmq_send_perror:");
+            printf("root number is %d\n",root_number);
+            zmq_send(pushers[root_number], create_command, sizeof(create_command), 0);
+            printf("чзх\n");
         }
-    
-        // zmq_msg_t message;
-        // zmq_msg_init(&message);
-        // char m
-        //         char message[100];
-        //         int check = -1;
-        //         while (check == -1){
-        //             check = zmq_recv(puller,message,100,ZMQ_DONTWAIT);
-        //             zmq_sleep(1);
-        //             printf("ну и хуйн\n");
-        //         }
-        //         printf("ураа я получил:%s\n", message);
-        //         printf("%d",check);
-        // }
+
+        if (!strcmp("ls",command)){
+            for (int i = 0; i < root_count;i++){
+                print_list(roots[i]);
+            }
+        }
     }
     for (int i = 0; i < root_count;i++){
         zmq_close(pushers[i]);
     }
     zmq_close(puller);
-    zmq_ctx_destroy(context);
 }
