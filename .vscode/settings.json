@@ -4,6 +4,7 @@
         "stdio.h": "c",
         "stdlib.h": "c",
         "list.h": "c",
-        "zmq.h": "c"
+        "zmq.h": "c",
+        "system_error": "c"
     }
 }
