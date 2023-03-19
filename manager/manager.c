@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #include "lib_manager.h"
-#include "list.h"
+#include "../list/list.h"
 #include "zmq.h"
 
 int main() {

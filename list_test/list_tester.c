@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "list.h"
+#include "../list/list.h"
 
 int main() {
     struct node** roots = malloc(sizeof(struct node*));
