@@ -46,10 +46,8 @@ int main() {
             }
                 
             pushers[root_count - 1] = zmq_socket(context, ZMQ_PUSH);
-            printf("%d",root_count - 1);
             char adress[50];
             sprintf(adress, "tcp://localhost:%d", 5555 + root_id);
-            printf("address:%s",adress);
             zmq_connect(pushers[root_count - 1], adress);
             int process_id = fork();
             if (!process_id) {
@@ -83,9 +81,7 @@ int main() {
             char create_command[50];
             int root_number = find_root(roots, root_count, parent_id);
             sprintf(create_command, "create %d %d", new_id, parent_id);
-            printf("root number is %d\n",root_number);
             zmq_send(pushers[root_number], create_command, sizeof(create_command), 0);
-            printf("чзх\n");
         }
 
         if (!strcmp("ls",command)){
