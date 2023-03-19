@@ -11,8 +11,12 @@ int main() {
     struct node** roots = malloc(sizeof(struct node*));
     void* context = zmq_ctx_new();
     void** pushers = malloc(sizeof(void*));
+    perror("LALK");
     void* puller = zmq_socket(context,ZMQ_PULL);
-    zmq_bind(puller, "tcp://localhost:5555");
+    perror("3");
+    zmq_bind(puller, "tcp://*:10020");
+    unsigned int error_code = zmq_errno();
+    printf("server socket erro:%u,%s\n",error_code,zmq_strerror(error_code));
     int root_count = 1, first_root = 1;
     char path[] = "/home/ugl/OS/worker/worker";
     printmenu();
@@ -102,4 +106,6 @@ int main() {
             printf("ураа я получил:%s\n", message);
         }
     }
+    zmq_close(puller);
+    zmq_ctx_destroy(context);
 }

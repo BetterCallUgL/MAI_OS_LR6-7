@@ -15,9 +15,9 @@ int main(int argc, char* argv[]) {
     void* pusher = zmq_socket(context,ZMQ_PUSH);
     char adress[100];
     printf("я люблю говно, а ещё :%d\n",atoi(argv[2]));
-    sprintf(adress,"tcp://localhost:%d",5554);
-    perror("бляха муха");
+    sprintf(adress,"tcp://localhost:%d",5555);
     zmq_connect(pusher,adress);
+    perror("бляха муха");
     // zmq_msg_t message;
     // zmq_msg_init_size(&message,strlen("пиписька"));
     // memcpy(zmq_msg_data(&message),"пиписька",strlen("пиписька"));
