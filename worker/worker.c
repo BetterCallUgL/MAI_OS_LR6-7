@@ -38,11 +38,7 @@ int main(int argc, char* argv[]) {
 
     while (1) {
         char message[50];
-        int check = zmq_recv(puller, message, 50, ZMQ_DONTWAIT);
-        while (check == -1) {
-            zmq_sleep(1);
-            check = zmq_recv(puller, message, 50, ZMQ_DONTWAIT);
-        }
+        zmq_recv(puller, message, 50, 0);
         printf("%d:Пришло сообщение:'%s'\n", my_id, message);
         fflush(stdout);
         char copy_message[50];
@@ -69,7 +65,7 @@ int main(int argc, char* argv[]) {
                 zmq_send(child_pusher, copy_message, sizeof(copy_message), 0);
             } else if (child_id != 0 && my_id == (atoi)(creator_id)) {
                 char new_parent[50];
-                printf("%d: Вставляю %s перед %d\n", my_id, new_id, child_id);
+                printf("%d:Вставляю %s перед %d\n", my_id, new_id, child_id);
                 fflush(stdout);
                 char old_child[10];
                 sprintf(old_child, "%d", child_id);

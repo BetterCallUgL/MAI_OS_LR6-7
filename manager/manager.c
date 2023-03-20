@@ -84,10 +84,14 @@ int main() {
             zmq_send(pushers[root_number], create_command, sizeof(create_command), 0);
         }
 
-        if (!strcmp("ls",command)){
+        if (!strcmp("list",command)){
             for (int i = 0; i < root_count;i++){
                 print_list(roots[i]);
             }
+        }
+
+        if (!strcmp("exec",command)){
+            
         }
     }
     for (int i = 0; i < root_count;i++){

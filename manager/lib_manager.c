@@ -8,7 +8,7 @@ void printmenu() {
     printf("1.Print menu\n");
     printf("2.Create new root\n");
     printf("3.Create new node\n");
-    printf("4.Ls - print list\n");
+    printf("4.Print List\n");
 }
 
 struct node* node_exists(struct node** roots, int root_count, int element_id) {
