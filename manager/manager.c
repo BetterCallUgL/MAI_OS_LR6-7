@@ -91,7 +91,11 @@ int main() {
         }
 
         if (!strcmp("exec",command)){
-            
+            char message[80];
+            fgets(message,sizeof(message),stdin);
+            message[strlen(message)-1] ='\0';
+            strcat(command,message);
+            printf("%s\n",command);
         }
     }
     for (int i = 0; i < root_count;i++){
