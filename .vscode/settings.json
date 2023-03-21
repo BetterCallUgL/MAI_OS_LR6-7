@@ -6,6 +6,8 @@
         "list.h": "c",
         "zmq.h": "c",
         "system_error": "c",
-        "ventilator": "c"
+        "ventilator": "c",
+        "lib_manager.h": "c",
+        "map.h": "c"
     }
 }

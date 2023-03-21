@@ -19,13 +19,14 @@ int main() {
     printmenu();
 
     while (1) {
-        char command[100];
+        char command[50];
         scanf("%s", command);
 
         // Print menu
         if (!strcmp(command, "menu")) {
             printmenu();
         }
+
         // Create New Root
         if (!strcmp(command, "root")) {
             int root_id;
@@ -41,10 +42,10 @@ int main() {
                 } else {
                     roots = realloc(roots, (++root_count) * sizeof(struct node*));
                     init(roots + root_count - 1, root_id);
-                    pushers = realloc(pushers,root_count*sizeof(void *));                
+                    pushers = realloc(pushers, root_count * sizeof(void*));
                 }
             }
-                
+
             pushers[root_count - 1] = zmq_socket(context, ZMQ_PUSH);
             char adress[50];
             sprintf(adress, "tcp://localhost:%d", 5555 + root_id);
@@ -76,7 +77,7 @@ int main() {
                 printf("This Parent doesn't exists\n");
                 continue;
             }
-            
+
             add_element(parent, new_id);
             char create_command[50];
             int root_number = find_root(roots, root_count, parent_id);
@@ -84,21 +85,40 @@ int main() {
             zmq_send(pushers[root_number], create_command, sizeof(create_command), 0);
         }
 
-        if (!strcmp("list",command)){
-            for (int i = 0; i < root_count;i++){
+        if (!strcmp("list", command)) {
+            for (int i = 0; i < root_count; i++) {
                 print_list(roots[i]);
             }
         }
 
-        if (!strcmp("exec",command)){
-            char message[80];
-            fgets(message,sizeof(message),stdin);
-            message[strlen(message)-1] ='\0';
-            strcat(command,message);
-            printf("%s\n",command);
+        // Exec command
+        if (!strcmp("exec", command)) {
+            char line[50];
+            char message[120];
+            int id;
+            scanf("%d", &id);
+            fgets(line, sizeof(line), stdin);
+            line[strlen(line) - 1] = '\0';
+            sprintf(message, "%s %d%s", command, id, line);
+
+            if (node_exists(roots, root_count, id) == NULL) {
+                printf("Node doesn't exists\n");
+                continue;
+            }
+
+            int root_number = find_root(roots, root_count, id);
+            zmq_send(pushers[root_number], message, sizeof(message), 0);
+            zmq_sleep(1);
+            char reply[100];
+            if (zmq_recv(puller, reply, 100, ZMQ_DONTWAIT) == -1) {
+                printf("Node is unavailable\n");
+            } else {
+                printf("%s\n", reply);
+            }
         }
     }
-    for (int i = 0; i < root_count;i++){
+
+    for (int i = 0; i < root_count; i++) {
         zmq_close(pushers[i]);
     }
     zmq_close(puller);

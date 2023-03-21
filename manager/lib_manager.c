@@ -5,10 +5,11 @@
 #include "../list/list.h"
 
 void printmenu() {
-    printf("1.Print menu\n");
-    printf("2.Create new root\n");
-    printf("3.Create new node\n");
-    printf("4.Print List\n");
+    printf("1.\"menu\"- Print menu\n");
+    printf("2.\"root id\"- Create new root\n");
+    printf("3.\"node id parent\"- Create new node\n");
+    printf("4.\"list\"- Print List\n");
+    printf("5.\"exec id name value\" - map command\n");
 }
 
 struct node* node_exists(struct node** roots, int root_count, int element_id) {
