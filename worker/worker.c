@@ -134,6 +134,10 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    if (dict_size > 0){
+        free(dict);
+    }
+    zmq_close(child_pusher);
     zmq_close(parent_pusher);
     zmq_close(puller);
     zmq_ctx_destroy(context);
