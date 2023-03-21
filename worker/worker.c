@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
                 } else {
                     fflush(stdout);
                     char real_key[40];
-                    strcpy(real_key,key);
+                    strcpy(real_key, key);
                     int val = atoi(value);
                     add_value(&dict, &dict_size, real_key, val);
                     fflush(stdout);
@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if (dict_size > 0){
+    if (dict_size > 0) {
         free(dict);
     }
     zmq_close(child_pusher);

@@ -116,7 +116,6 @@ int main() {
                 printf("%s\n", reply);
             }
         }
-
     }
 
     for (int i = 0; i < root_count; i++) {
