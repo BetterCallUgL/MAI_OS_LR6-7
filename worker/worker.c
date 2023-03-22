@@ -21,11 +21,11 @@ int main(int argc, char* argv[]) {
     void* parent_pusher = zmq_socket(context, ZMQ_PUSH);
     void* puller = zmq_socket(context, ZMQ_PULL);
     void* child_pusher = zmq_socket(context, ZMQ_PUSH);
+    char child_adress[50];
     int child_id = 0;
 
     if (argv[3] != NULL) {
         child_id = (atoi)(argv[3]);
-        char child_adress[50];
         sprintf(child_adress, "tcp://localhost:%d", 5555 + child_id);
         zmq_connect(child_pusher, child_adress);
         // printf("%d:У меня есть ребёнок - %s\n", my_id, argv[3]);
@@ -43,13 +43,14 @@ int main(int argc, char* argv[]) {
     while (1) {
         char message[100];
         zmq_recv(puller, message, 100, 0);
-        printf("%d:Пришло сообщение:'%s'\n", my_id, message);
+        printf("%d:Пришло новое сообщение\n", my_id, message);
         fflush(stdout);
         char copy_message[100];
         for (int i = 0; i < 100; i++) {
             copy_message[i] = message[i];
         }
         char* command = strtok(message, " ");
+
         if (!strcmp(command, "create")) {
             char* new_id = strtok(NULL, " ");
             char* creator_id = strtok(NULL, " ");
@@ -58,13 +59,14 @@ int main(int argc, char* argv[]) {
                 child_id = (atoi)(new_id);
                 char child_adress[50];
                 sprintf(child_adress, "tcp://localhost:%d", 5555 + child_id);
+                child_pusher = zmq_socket(context, ZMQ_PUSH);
                 zmq_connect(child_pusher, child_adress);
                 int process_id = fork();
                 if (!process_id) {
                     execl(argv[0], argv[0], new_id, creator_id, NULL);
                 }
             } else if (child_id != 0 && my_id != (atoi)(creator_id)) {
-                printf("%d:Пересылаю %d\n", my_id, child_id);
+                // printf("%d:Пересылаю %d\n", my_id, child_id);
                 zmq_send(child_pusher, copy_message, sizeof(copy_message), 0);
             } else if (child_id != 0 && my_id == (atoi)(creator_id)) {
                 char new_parent[50];
@@ -72,7 +74,7 @@ int main(int argc, char* argv[]) {
                 fflush(stdout);
                 char old_child[10];
                 sprintf(old_child, "%d", child_id);
-                sprintf(new_parent, "new %s", new_id);
+                sprintf(new_parent, "parent %s", new_id);
                 zmq_send(child_pusher, new_parent, sizeof(copy_message), 0);
                 zmq_close(child_pusher);
                 child_pusher = zmq_socket(context, ZMQ_PUSH);
@@ -87,13 +89,24 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        if (!strcmp(command, "new")) {
+        if (!strcmp(command, "parent")) {
             char* new_parent = strtok(NULL, " ");
             parent_id = atoi(new_parent);
             zmq_close(parent_pusher);  // проблемная зона
             parent_pusher = zmq_socket(context, ZMQ_PUSH);
             sprintf(parent_adress, "tcp://localhost:%d", 5555 + parent_id);
             zmq_connect(parent_pusher, parent_adress);
+            // printf("%d:Мой новый родитель теперь:%d \n", my_id, parent_id);
+            fflush(stdout);
+        }
+
+        if (!strcmp(command, "child")) {
+            char* new_child = strtok(NULL, " ");
+            child_id = atoi(new_child);
+            zmq_close(child_pusher);  // проблемная зона
+            child_pusher = zmq_socket(context, ZMQ_PUSH);
+            sprintf(child_adress, "tcp://localhost:%d", 5555 + child_id);
+            zmq_connect(child_pusher, child_adress);
             // printf("%d:Мой новый родитель теперь:%d \n", my_id, parent_id);
             fflush(stdout);
         }
@@ -129,7 +142,33 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        if (!strcmp(command, "Ok:")) {
+        if (!strcmp("remove", command)) {
+            char* id = strtok(NULL, " ");
+            if (my_id != atoi(id)) {
+                zmq_send(child_pusher, copy_message, sizeof(copy_message), 0);
+            } else {
+                if (child_id == 0) {
+                    zmq_send(parent_pusher, "dead", 5, 0);
+                    break;
+                } else{
+                    char message[100];
+                    sprintf(message,"parent %d",parent_id);
+                    zmq_send(child_pusher,message,sizeof(message),0);
+                    sprintf(message,"child %d",child_id);
+                    zmq_send(parent_pusher,message,sizeof(message),0);
+                    zmq_send(parent_pusher,"Ok",sizeof(message),0);
+                    break;
+                }
+            }
+        }
+
+        if (!strcmp("dead", command)) {
+            child_id = 0;
+            zmq_close(child_pusher);
+            zmq_send(parent_pusher, "Ok", 3, 0);
+        }
+
+        if (!strcmp(command, "Ok:") || !(strcmp(command, "Ok"))) {
             zmq_send(parent_pusher, copy_message, sizeof(copy_message), 0);
         }
     }

@@ -37,7 +37,7 @@ int main() {
                 first_root = 0;
             } else {
                 if (node_exists(roots, root_count, root_id) != NULL) {
-                    printf("This Node already exists\n");
+                    printf("Error: This Node already exists\n");
                     continue;
                 } else {
                     roots = realloc(roots, (++root_count) * sizeof(struct node*));
@@ -55,7 +55,7 @@ int main() {
                 char id[10];
                 sprintf(id, "%d", root_id);
                 if (execl(path, path, id, "-1", NULL) == -1) {
-                    printf("Root hasn't created\n");
+                    printf("Error: Root hasn't created\n");
                     return -1;
                 }
             }
@@ -68,13 +68,13 @@ int main() {
             scanf("%d", &new_id);
             scanf("%d", &parent_id);
             if (node_exists(roots, root_count, new_id) != NULL) {
-                printf("This Node already exists\n");
+                printf("Error: This Node already exists\n");
                 continue;
             }
 
             struct node* parent = node_exists(roots, root_count, parent_id);
             if (parent == NULL) {
-                printf("This Parent doesn't exists\n");
+                printf("Error: This Parent doesn't exists\n");
                 continue;
             }
 
@@ -102,7 +102,7 @@ int main() {
             sprintf(message, "%s %d%s", command, id, line);
 
             if (node_exists(roots, root_count, id) == NULL) {
-                printf("Node doesn't exists\n");
+                printf("Error: Node doesn't exists\n");
                 continue;
             }
 
@@ -111,8 +111,32 @@ int main() {
             zmq_sleep(1);
             char reply[100];
             if (zmq_recv(puller, reply, 100, ZMQ_DONTWAIT) == -1) {
-                printf("Node is unavailable\n");
+                printf("Error: Node is unavailable\n");
             } else {
+                printf("%s\n", reply);
+            }
+        }
+
+        // Remove command
+        if (!strcmp("remove", command)) {
+            int id;
+            scanf("%d", &id);
+            char message[100];
+
+            if (node_exists(roots, root_count, id) == NULL) {
+                printf("Error: Node doesn't exists\n");
+                continue;
+            }
+
+            sprintf(message, "%s %d", command, id);
+            int root_number = find_root(roots, root_count, id);
+            zmq_send(pushers[root_number], message, sizeof(message), 0);
+            zmq_sleep(1);
+            char reply[100];
+            if (zmq_recv(puller, reply, 100, ZMQ_DONTWAIT) == -1) {
+                printf("Error: Node is unavailable\n");
+            } else {
+                delete_elem(roots[root_number], id);
                 printf("%s\n", reply);
             }
         }
