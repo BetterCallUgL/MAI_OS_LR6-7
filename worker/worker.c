@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,6 +6,20 @@
 
 #include "../map/map.h"
 #include "zmq.h"
+
+struct args {
+    void* pusher;
+    int delay;
+    char id[20];
+};
+
+void* hearbit(void* arguments) {
+    struct args* info = (struct args*)arguments;
+    while (1) {
+        zmq_send(info->pusher, info->id, 20, 0);
+        zmq_sleep(info->delay);
+    }
+}
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -21,6 +36,8 @@ int main(int argc, char* argv[]) {
     void* parent_pusher = zmq_socket(context, ZMQ_PUSH);
     void* puller = zmq_socket(context, ZMQ_PULL);
     void* child_pusher = zmq_socket(context, ZMQ_PUSH);
+    void* root_pusher = zmq_socket(context, ZMQ_PUSH);
+    zmq_connect(root_pusher, "tcp://localhost:5553");
     char child_adress[50];
     int child_id = 0;
 
@@ -39,11 +56,12 @@ int main(int argc, char* argv[]) {
     char parent_adress[50];
     sprintf(parent_adress, "tcp://localhost:%d", 5555 + parent_id);
     zmq_connect(parent_pusher, parent_adress);
+    pthread_t* thread = (pthread_t*)malloc(sizeof(pthread_t));
 
     while (1) {
         char message[100];
         zmq_recv(puller, message, 100, 0);
-        printf("%d:Пришло новое сообщение\n", my_id, message);
+        printf("%d:Пришло сообщение:'%s'\n", my_id, message);
         fflush(stdout);
         char copy_message[100];
         for (int i = 0; i < 100; i++) {
@@ -70,7 +88,6 @@ int main(int argc, char* argv[]) {
                 zmq_send(child_pusher, copy_message, sizeof(copy_message), 0);
             } else if (child_id != 0 && my_id == (atoi)(creator_id)) {
                 char new_parent[50];
-                // printf("%d:Вставляю %s перед %d\stdout_id, new_id, child_id);
                 fflush(stdout);
                 char old_child[10];
                 sprintf(old_child, "%d", child_id);
@@ -150,13 +167,13 @@ int main(int argc, char* argv[]) {
                 if (child_id == 0) {
                     zmq_send(parent_pusher, "dead", 5, 0);
                     break;
-                } else{
+                } else {
                     char message[100];
-                    sprintf(message,"parent %d",parent_id);
-                    zmq_send(child_pusher,message,sizeof(message),0);
-                    sprintf(message,"child %d",child_id);
-                    zmq_send(parent_pusher,message,sizeof(message),0);
-                    zmq_send(parent_pusher,"Ok",sizeof(message),0);
+                    sprintf(message, "parent %d", parent_id);
+                    zmq_send(child_pusher, message, sizeof(message), 0);
+                    sprintf(message, "child %d", child_id);
+                    zmq_send(parent_pusher, message, sizeof(message), 0);
+                    zmq_send(parent_pusher, "Ok", sizeof(message), 0);
                     break;
                 }
             }
@@ -170,6 +187,18 @@ int main(int argc, char* argv[]) {
 
         if (!strcmp(command, "Ok:") || !(strcmp(command, "Ok"))) {
             zmq_send(parent_pusher, copy_message, sizeof(copy_message), 0);
+        }
+
+        if (!strcmp(command, "hearbit")) {
+            if (child_id != 0) {
+                zmq_send(child_pusher, copy_message, sizeof(copy_message), 0);
+            }
+            char* delay = strtok(NULL, " ");
+            struct args* info = malloc(sizeof(struct args));
+            info->delay = atoi(delay);
+            info->pusher = root_pusher;
+            strcpy(info->id, argv[1]);
+            pthread_create(thread, NULL, &hearbit, info);
         }
     }
 

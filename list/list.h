@@ -3,7 +3,6 @@
 
 struct node {
     int id;
-    int available;
     struct node* next;
 };
 
@@ -12,4 +11,5 @@ struct node* add_element(struct node* root, int id);
 struct node* find_element(struct node* root, int id);
 struct node* delete_elem(struct node* root, int id);
 void print_list(struct node* root);
+void destroy_list(struct node* root);
 #endif

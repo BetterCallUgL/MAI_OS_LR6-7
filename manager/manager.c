@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,10 +14,13 @@ int main() {
     void* context = zmq_ctx_new();
     void** pushers = malloc(sizeof(void*));
     void* puller = zmq_socket(context, ZMQ_PULL);
+    void* hearbit_puller = zmq_socket(context, ZMQ_PULL);
+    zmq_bind(hearbit_puller, "tcp://*:5553");
     zmq_bind(puller, "tcp://*:5554");
     int root_count = 1, first_root = 1;
     char path[] = "/home/ugl/OS/worker/worker";
     printmenu();
+    pthread_t* thread = (pthread_t*)malloc(sizeof(pthread_t));
 
     while (1) {
         char command[50];
@@ -140,10 +144,23 @@ int main() {
                 printf("%s\n", reply);
             }
         }
+
+        if (!strcmp(command, "hearbit")) {
+            int delay;
+            scanf("%d", &delay);
+            struct arguments* args = malloc(sizeof(struct arguments));
+            args->puller = hearbit_puller;
+            args->pushers = pushers;
+            args->root_count = root_count;
+            args->roots = roots;
+            args->delay = delay;
+            pthread_create(thread, NULL, &hearbit, args);
+        }
     }
 
     for (int i = 0; i < root_count; i++) {
         zmq_close(pushers[i]);
     }
+    zmq_close(hearbit_puller);
     zmq_close(puller);
 }
